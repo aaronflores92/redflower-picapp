@@ -1,13 +1,25 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+const MOCK_USER = {
+    username: 'admin',
+    password: 'password123',
+}
 
 function LoginPage() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
 
     function handleSubmit(e) {
         e.preventDefault();
-        console.log('Username:', username);
-        console.log('Password:', password);
+        if (username === MOCK_USER.username && password === MOCK_USER.password) {
+            navigate('/gallery');
+        }
+        else {
+            setError('Invalid username or password.');
+        }
     }
 
     return (
@@ -30,6 +42,7 @@ function LoginPage() {
                         onChange={(e) => setPassword(e.target.value)}
                     />
                 </div>
+                {error && <p style={{ color: 'red' }}>{error}</p>}
                 <button type="submit">Login!</button>
             </form>
         </div>
