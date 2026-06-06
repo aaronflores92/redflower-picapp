@@ -1,16 +1,50 @@
-# React + Vite
+# redflowerpics
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A personal photo storage web app. Users log in and can browse and upload their photos. Photos are stored in AWS S3 with database-backed references.
 
-Currently, two official plugins are available:
+## Status
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+In active development. The frontend scaffold, login flow, and gallery page are complete. Backend, authentication, and S3 integration are upcoming.
 
-## React Compiler
+## Tech stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Frontend:** React 19 (JavaScript), Vite
+- **Routing:** React Router v6
+- **Storage (planned):** AWS S3 + database
+- **Deployment target:** redflowerpics.dev
 
-## Expanding the ESLint configuration
+## Prerequisites
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- [Node.js](https://nodejs.org/) v18 or higher
+- npm (comes with Node)
+
+## Running locally
+
+1. Clone the repository
+2. Install dependencies:
+   ```
+   npm install
+   ```
+3. Start the development server:
+   ```
+   npm run dev
+   ```
+4. Open your browser to `http://localhost:5173`
+
+## Project structure
+
+```
+src/
+  pages/
+    LoginPage.jsx     # Login form with credential validation
+    GalleryPage.jsx   # Photo grid display
+  App.jsx             # Route definitions
+  main.jsx            # App entry point
+```
+
+## Current mock credentials
+
+While the backend is not yet connected, use these to log in locally:
+
+- **Username:** admin
+- **Password:** password123
