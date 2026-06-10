@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import GalleryPage from './pages/GalleryPage';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
@@ -8,7 +9,11 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/gallery" element={<GalleryPage />} />
+        <Route path="/gallery" element={
+          <ProtectedRoute>
+            <GalleryPage />
+          </ProtectedRoute>
+        } />
       </Routes>
     </BrowserRouter>
   );

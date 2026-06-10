@@ -15,6 +15,7 @@ function LoginPage() {
     function handleSubmit(e) {
         e.preventDefault();
         if (username === MOCK_USER.username && password === MOCK_USER.password) {
+            localStorage.setItem('isLoggedIn', 'true');
             navigate('/gallery');
         }
         else {
