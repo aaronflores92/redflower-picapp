@@ -35,11 +35,18 @@ In active development. The frontend scaffold, login flow, and gallery page are c
 
 ```
 src/
+  components/
+    Header.jsx        # App header with hamburger menu and logout
+    Header.css
+    ProtectedRoute.jsx  # Redirects unauthenticated users to /login
   pages/
     LoginPage.jsx     # Login form with credential validation
+    LoginPage.css
     GalleryPage.jsx   # Photo grid display
+    GalleryPage.css
   App.jsx             # Route definitions
   main.jsx            # App entry point
+  index.css           # Global styles
 ```
 
 ## Current mock credentials
