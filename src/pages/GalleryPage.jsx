@@ -1,3 +1,7 @@
+import Header from '../components/Header';
+
+import './GalleryPage.css';
+
 const MOCK_PHOTOS = [
     { id: 1, url: 'https://picsum.photos/seed/1/300/300', alt: 'Photo 1' },
     { id: 2, url: 'https://picsum.photos/seed/2/300/300', alt: 'Photo 2' },
@@ -15,20 +19,15 @@ const MOCK_PHOTOS = [
 
 function GalleryPage() {
     return (
-        <div>
+        <div className="gallery-page">
+            <Header />
             <h1>Gallery</h1>
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(5, 1fr)',
-                gap: '16px',
-                padding: '16px',
-            }}>
+            <div className="photo-grid">
                 {MOCK_PHOTOS.map((photo) => (
                     <img
                         key={photo.id}
                         src={photo.url}
                         alt={photo.alt}
-                        style={{ width: '100%', borderRadius: '8px'}} 
                     />
                 ))}
             </div>
