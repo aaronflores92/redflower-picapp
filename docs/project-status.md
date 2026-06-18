@@ -2,7 +2,7 @@
 
 **Domain:** redflowerpics.dev
 **Stack:** Vite + React (JavaScript), React Router v6
-**Last Updated:** 2026-06-10
+**Last Updated:** 2026-06-17
 
 ---
 
@@ -78,6 +78,19 @@ RedFlowerPics is a personal photo application with a web frontend accessible fro
 
 ---
 
+### Session 3
+
+**Photo Upload Flow**
+- `GalleryPage.jsx` converted `MOCK_PHOTOS` from a static constant to `useState` so the gallery reflects additions and deletions immediately
+- Added `selectedIds` state (a `Set`) to `GalleryPage.jsx` — clicking a photo card toggles its selection; selected cards show a burnt orange outline and a ✓ badge
+- Added two action buttons above the grid: **Add Photos** (opens upload modal) and **Delete Selected** (disabled when nothing is selected; shows browser `window.confirm()` with the count before removing)
+- Created `src/components/UploadModal.jsx` — file picker modal with multi-file support, thumbnail previews via `URL.createObjectURL()`, running photo count, and Confirm/Cancel actions
+- Created `src/components/UploadModal.css` — modal overlay, preview grid, and action button layout
+- Upload appends to existing previews across multiple picker opens; confirmed photos are appended to gallery state with `Date.now()`-based IDs
+- Debugged a silent render failure caused by a mismatched curly brace that wrapped the JSX return inside `handleFileChange`
+
+---
+
 ## Current File Structure
 
 ```
@@ -86,6 +99,8 @@ src/
     Header.jsx
     Header.css
     ProtectedRoute.jsx
+    UploadModal.jsx
+    UploadModal.css
   pages/
     LoginPage.jsx
     LoginPage.css
@@ -100,8 +115,7 @@ src/
 
 ## What's Next
 
-1. **Photo upload flow** — UI for selecting and uploading photos; each upload will generate a thumbnail used in the gallery
-2. **Profile page** — basic user profile page wired to the Profile menu option in the header
-3. **Backend** — Node/Express API connecting to AWS S3 and a database
-4. **Real auth** — replace mock credentials with JWT or session-based authentication
-5. **Deployment** — configure Vite base URL and hosting for `redflowerpics.dev`
+1. **Profile page** — basic user profile page wired to the Profile menu option in the header
+2. **Backend** — Node/Express API connecting to AWS S3 and a database
+3. **Real auth** — replace mock credentials with JWT or session-based authentication
+4. **Deployment** — configure Vite base URL and hosting for `redflowerpics.dev`

@@ -1,4 +1,7 @@
+import { useState } from 'react';
+
 import Header from '../components/Header';
+import UploadModal from '../components/UploadModal';
 
 import './GalleryPage.css';
 
@@ -18,19 +21,77 @@ const MOCK_PHOTOS = [
 ];
 
 function GalleryPage() {
+    const [photos, setPhotos] = useState(MOCK_PHOTOS);
+    const [selectedIds, setSelectedIds] = useState(new Set());
+    const [showModal, setShowModal] = useState(false);
+
+    function handleToggleSelect(id) {
+        setSelectedIds(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) {
+                next.delete(id);
+            }
+            else {
+                next.add(id);
+            }
+            return next;
+        });
+    }
+
+    function handleDeleteSelected() {
+        const count = selectedIds.size;
+        const confirmed = window.confirm(`Delete ${count} photo${count !== 1 ? 's' : ''}?`);
+        if (confirmed) {
+            setPhotos(prev => prev.filter(p => !selectedIds.has(p.id)));
+            setSelectedIds(new Set());
+        }
+    }
+
+    function handleUploadConfirm(previews) {
+        const newPhotos = previews.map((p, i) => ({
+            id: Date.now() + i,
+            url: p.url,
+            alt: p.alt,
+        }));
+        setPhotos(prev => [...prev, ...newPhotos]);
+        setShowModal(false);
+    }
+
     return (
         <div className="gallery-page">
             <Header />
             <h1>Gallery</h1>
+            <div className="gallery-actions">
+                <button className="btn btn-primary" onClick={() => { console.log('clicked'); setShowModal(true); }}>
+                    Add Photos
+                </button>
+                <button
+                    className="btn btn-danger"
+                    onClick={handleDeleteSelected}
+                    disabled={selectedIds.size === 0}
+                >
+                    Delete Selected {selectedIds.size > 0 ? `(${selectedIds.size})` : ''}
+                </button>
+            </div>
             <div className="photo-grid">
-                {MOCK_PHOTOS.map((photo) => (
-                    <img
+                {photos.map((photo) => (
+                    <div
                         key={photo.id}
-                        src={photo.url}
-                        alt={photo.alt}
-                    />
+                        className={`photo-card${selectedIds.has(photo.id) ? ' selected' : ''}`}
+                        onClick={() => handleToggleSelect(photo.id)}
+                    >
+                        <img src={photo.url} alt={photo.alt} />
+                        {selectedIds.has(photo.id) && <span className="checkmark">✓</span>}
+                    </div>
                 ))}
             </div>
+            {console.log('showModal:', showModal)}
+            {showModal && (
+                <UploadModal
+                    onClose={() => setShowModal(false)}
+                    onConfirm={handleUploadConfirm}
+                />
+            )}
         </div>
     );
 }
