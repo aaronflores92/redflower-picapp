@@ -13,6 +13,11 @@ function Header({ showMenu = true }) {
         navigate('/gallery');
     }
 
+    function handleProfile() {
+        setMenuOpen(false);
+        navigate('/profile');
+    }
+
     function handleLogout() {
         setMenuOpen(false);
         localStorage.removeItem('isLoggedIn');
@@ -32,7 +37,8 @@ function Header({ showMenu = true }) {
                     <button className={location.pathname === '/gallery' ? 'active' : ''}
                     onClick={handleGallery}>Gallery</button>
                     <button className="disabled" disabled>Add Photos</button>
-                    <button className="disabled" disabled>Profile</button>
+                    <button className={location.pathname === '/profile' ? 'active' : ''}
+                    onClick={handleProfile}>Profile</button>
                     <button onClick={handleLogout}>Log Out</button>
                 </div>
             )}

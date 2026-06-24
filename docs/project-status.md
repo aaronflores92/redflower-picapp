@@ -2,7 +2,7 @@
 
 **Domain:** redflowerpics.dev
 **Stack:** Vite + React (JavaScript), React Router v6
-**Last Updated:** 2026-06-17
+**Last Updated:** 2026-06-24
 
 ---
 
@@ -17,7 +17,7 @@ RedFlowerPics is a personal photo application with a web frontend accessible fro
 | Decision | Detail |
 |---|---|
 | Language | Plain JavaScript (no TypeScript) |
-| Routing | React Router v6 — `/` redirects to `/login`, `/login`, `/gallery` |
+| Routing | React Router v6 — `/` redirects to `/login`, `/login`, `/gallery`, `/profile` |
 | Auth (current) | `localStorage` flag (`isLoggedIn`) set on successful login, cleared on logout |
 | Auth (planned) | JWT or session-based auth to replace the mock credentials |
 | Photo storage | AWS S3 for files; a database will hold S3 references/keys |
@@ -80,7 +80,7 @@ RedFlowerPics is a personal photo application with a web frontend accessible fro
 
 ### Session 3
 
-**Photo Upload Flow**
+**Step 7 — Photo Upload Flow**
 - `GalleryPage.jsx` converted `MOCK_PHOTOS` from a static constant to `useState` so the gallery reflects additions and deletions immediately
 - Added `selectedIds` state (a `Set`) to `GalleryPage.jsx` — clicking a photo card toggles its selection; selected cards show a burnt orange outline and a ✓ badge
 - Added two action buttons above the grid: **Add Photos** (opens upload modal) and **Delete Selected** (disabled when nothing is selected; shows browser `window.confirm()` with the count before removing)
@@ -88,6 +88,17 @@ RedFlowerPics is a personal photo application with a web frontend accessible fro
 - Created `src/components/UploadModal.css` — modal overlay, preview grid, and action button layout
 - Upload appends to existing previews across multiple picker opens; confirmed photos are appended to gallery state with `Date.now()`-based IDs
 - Debugged a silent render failure caused by a mismatched curly brace that wrapped the JSX return inside `handleFileChange`
+
+---
+
+### Session 4
+
+**Step 8 — Profile Page + Coming Soon Placeholder**
+- Created `src/pages/ProfilePage.jsx` — displays a circular SVG avatar placeholder, mock name and email, and a non-functional Reset Password button (wired up once real auth is implemented)
+- Created `src/pages/ProfilePage.css` — centered card layout matching the existing dark theme; burnt orange Reset Password button consistent with other primary actions
+- Created `src/pages/ComingSoonPage.jsx` — reusable placeholder page accepting a `pageName` prop; used to park routes that are built but not yet active
+- `/profile` route added to `App.jsx` as a protected route, currently pointing to `ComingSoonPage` — swap to `ProfilePage` when auth is ready
+- `Header.jsx` Profile button enabled: navigates to `/profile` and highlights active state in burnt orange (same pattern as Gallery)
 
 ---
 
@@ -106,6 +117,9 @@ src/
     LoginPage.css
     GalleryPage.jsx
     GalleryPage.css
+    ProfilePage.jsx
+    ProfilePage.css
+    ComingSoonPage.jsx
   App.jsx
   main.jsx
   index.css
@@ -115,7 +129,6 @@ src/
 
 ## What's Next
 
-1. **Profile page** — basic user profile page wired to the Profile menu option in the header
-2. **Backend** — Node/Express API connecting to AWS S3 and a database
-3. **Real auth** — replace mock credentials with JWT or session-based authentication
-4. **Deployment** — configure Vite base URL and hosting for `redflowerpics.dev`
+1. **Backend** — Node/Express API connecting to AWS S3 and a database
+2. **Real auth** — replace mock credentials with JWT or session-based authentication; re-enable ProfilePage once auth is wired
+3. **Deployment** — configure Vite base URL and hosting for `redflowerpics.dev`

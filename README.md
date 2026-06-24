@@ -4,7 +4,7 @@ A personal photo storage web app. Users log in and can browse and upload their p
 
 ## Status
 
-In active development. The frontend scaffold, login flow, gallery page, and photo upload/delete flow are complete. Backend, authentication, and S3 integration are upcoming.
+In active development. The frontend scaffold, login flow, gallery page, photo upload/delete flow, and profile page are complete. Backend, authentication, and S3 integration are upcoming.
 
 ## Tech stack
 
@@ -46,6 +46,9 @@ src/
     LoginPage.css
     GalleryPage.jsx   # Photo grid with add and delete support
     GalleryPage.css
+    ProfilePage.jsx   # User profile — avatar, name, email, reset password (dormant until auth is ready)
+    ProfilePage.css
+    ComingSoonPage.jsx  # Reusable placeholder for routes not yet active
   App.jsx             # Route definitions
   main.jsx            # App entry point
   index.css           # Global styles
