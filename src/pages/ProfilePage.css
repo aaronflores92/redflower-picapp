@@ -74,3 +74,10 @@
 .reset-password-btn:hover {
     background-color: #a0521f;
 }
+
+.success-text {
+    color: #60c080;
+    font-size: 0.85rem;
+    margin-bottom: 0;
+    margin-top: 0.75rem;
+}

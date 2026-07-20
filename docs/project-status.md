@@ -2,7 +2,7 @@
 
 **Domain:** redflowerpics.dev
 **Stack:** Vite + React (JavaScript), React Router v6
-**Last Updated:** 2026-06-24
+**Last Updated:** 2026-07-20
 
 ---
 
@@ -18,8 +18,7 @@ RedFlowerPics is a personal photo application with a web frontend accessible fro
 |---|---|
 | Language | Plain JavaScript (no TypeScript) |
 | Routing | React Router v6 — `/` redirects to `/login`, `/login`, `/gallery`, `/profile` |
-| Auth (current) | `localStorage` flag (`isLoggedIn`) set on successful login, cleared on logout |
-| Auth (planned) | JWT or session-based auth to replace the mock credentials |
+| Auth | Firebase Authentication (email/password provider) — sign-up, login, logout, and password reset all backed by Firebase; user session tracked via `AuthContext` |
 | Photo storage | AWS S3 for files; a database will hold S3 references/keys |
 | Mock data shape | `MOCK_PHOTOS` array mirrors the real API shape (`id`, `url`, `alt`) so swapping in real data only changes the data source, not the components |
 | Gallery layout | `auto-fill minmax(150px, 1fr)` CSS grid — responsive across desktop and mobile without a fixed column count |
@@ -102,6 +101,24 @@ RedFlowerPics is a personal photo application with a web frontend accessible fro
 
 ---
 
+### Session 5
+
+**Step 9 — Firebase Authentication**
+- Replaced mock `admin`/`password123` login with real Firebase Authentication (email/password provider)
+- Installed `firebase` package; added `src/firebase.js` as the single Firebase init point, reading config from `import.meta.env.VITE_FIREBASE_*` vars (`.env`, gitignored; `.env.example` committed with placeholder keys)
+- Created `src/AuthContext.jsx` — `AuthProvider` + `useAuth()` hook, subscribes once to `onAuthStateChanged` and shares `{ user, loading }` app-wide; wraps `<Routes>` in `App.jsx`
+- Created `src/pages/SignUpPage.jsx` — mirrors `LoginPage.jsx` with Name (optional), Email, Password, Confirm Password fields; calls `createUserWithEmailAndPassword` and `updateProfile` for the display name; new `/signup` route
+- Renamed `LoginPage.css` → `AuthPage.css`, shared by Login and SignUp pages
+- `LoginPage.jsx` — `username` state replaced with `email`; `handleSubmit` calls `signInWithEmailAndPassword`; Firebase error codes mapped to inline error text; added "Sign up" link
+- `ProtectedRoute.jsx` — now reads `{ user, loading }` from `useAuth()` instead of a `localStorage` flag; renders nothing while `loading` to avoid a flash-redirect on page refresh
+- `Header.jsx` — `handleLogout` now calls Firebase `signOut`
+- `ProfilePage.jsx` — mock user data replaced with the real signed-in `user` from `useAuth()`; Reset Password button wired to `sendPasswordResetEmail`, with a new `.success-text` style for the confirmation message
+- `/profile` route in `App.jsx` swapped from `ComingSoonPage` to the real `ProfilePage` — no longer dormant
+- Manual verification in-browser: sign-up, duplicate sign-up, logout/redirect, refresh-without-flash, wrong password, correct login, incognito direct-nav protection, profile displaying real data, and password reset email flow all confirmed working
+- Fixed a missing `Link` import in `LoginPage.jsx` and added a specific error case for `auth/password-does-not-meet-requirements` (thrown when Firebase Console's Password Policy enforcement is enabled) alongside the default `auth/weak-password` case
+
+---
+
 ## Current File Structure
 
 ```
@@ -114,12 +131,15 @@ src/
     UploadModal.css
   pages/
     LoginPage.jsx
-    LoginPage.css
+    SignUpPage.jsx
+    AuthPage.css
     GalleryPage.jsx
     GalleryPage.css
     ProfilePage.jsx
     ProfilePage.css
     ComingSoonPage.jsx
+  AuthContext.jsx
+  firebase.js
   App.jsx
   main.jsx
   index.css
@@ -130,5 +150,4 @@ src/
 ## What's Next
 
 1. **Backend** — Node/Express API connecting to AWS S3 and a database
-2. **Real auth** — replace mock credentials with JWT or session-based authentication; re-enable ProfilePage once auth is wired
-3. **Deployment** — configure Vite base URL and hosting for `redflowerpics.dev`
+2. **Deployment** — configure Vite base URL and hosting for `redflowerpics.dev`

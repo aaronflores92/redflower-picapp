@@ -4,12 +4,13 @@ A personal photo storage web app. Users log in and can browse and upload their p
 
 ## Status
 
-In active development. The frontend scaffold, login flow, gallery page, photo upload/delete flow, and profile page are complete. Backend, authentication, and S3 integration are upcoming.
+In active development. The frontend scaffold, login/sign-up flow, gallery page, photo upload/delete flow, and profile page are complete. Authentication is handled by Firebase. Backend and S3 integration are upcoming.
 
 ## Tech stack
 
 - **Frontend:** React 19 (JavaScript), Vite
 - **Routing:** React Router v6
+- **Auth:** Firebase Authentication (email/password)
 - **Storage (planned):** AWS S3 + database
 - **Deployment target:** redflowerpics.dev
 
@@ -25,11 +26,12 @@ In active development. The frontend scaffold, login flow, gallery page, photo up
    ```
    npm install
    ```
-3. Start the development server:
+3. Copy `.env.example` to `.env` and fill in your Firebase project's config values (from the Firebase Console → Project settings → General → Your apps)
+4. Start the development server:
    ```
    npm run dev
    ```
-4. Open your browser to `http://localhost:5173`
+5. Open your browser to `http://localhost:5173`
 
 ## Project structure
 
@@ -42,21 +44,21 @@ src/
     UploadModal.jsx     # Modal for selecting and previewing photos before upload
     UploadModal.css
   pages/
-    LoginPage.jsx     # Login form with credential validation
-    LoginPage.css
+    LoginPage.jsx     # Login form, Firebase email/password sign-in
+    SignUpPage.jsx    # Sign-up form, Firebase account creation
+    AuthPage.css      # Shared styles for Login and SignUp pages
     GalleryPage.jsx   # Photo grid with add and delete support
     GalleryPage.css
-    ProfilePage.jsx   # User profile — avatar, name, email, reset password (dormant until auth is ready)
+    ProfilePage.jsx   # User profile — avatar, real name/email, reset password
     ProfilePage.css
     ComingSoonPage.jsx  # Reusable placeholder for routes not yet active
+  AuthContext.jsx     # AuthProvider + useAuth() — shares the signed-in user app-wide
+  firebase.js         # Firebase init; exports `auth`
   App.jsx             # Route definitions
   main.jsx            # App entry point
   index.css           # Global styles
 ```
 
-## Current mock credentials
+## Authentication
 
-While the backend is not yet connected, use these to log in locally:
-
-- **Username:** admin
-- **Password:** password123
+Auth is handled by Firebase Authentication (email/password provider). Sign up for a new account at `/signup`, or log in at `/login`. Password resets are available from the Profile page.

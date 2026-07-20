@@ -72,3 +72,15 @@
 .login-button:hover {
     background-color: #a0521f;
 }
+
+.auth-switch {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #a0a0b0;
+    margin-top: 1rem;
+    margin-bottom: 0;
+}
+
+.auth-switch a {
+    color: #c0622f;
+}
