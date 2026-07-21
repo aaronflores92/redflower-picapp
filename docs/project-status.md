@@ -2,7 +2,7 @@
 
 **Domain:** redflowerpics.dev
 **Stack:** Vite + React (JavaScript), React Router v6
-**Last Updated:** 2026-07-20
+**Last Updated:** 2026-07-21
 
 ---
 
@@ -119,6 +119,22 @@ RedFlowerPics is a personal photo application with a web frontend accessible fro
 
 ---
 
+### Session 6
+
+**Step 10 — Backend scaffold begins (`/server`)**
+- Locked-in architecture (Express + Postgres + S3) recorded in `implement_upload_backend.plan.md`: shared gallery (not private-per-user), presigned S3 PUT/GET, Firebase ID token verification via `firebase-admin`, plain numbered `.sql` migrations with a custom runner, no ORM
+- Created `/server` folder structure (`src/config`, `src/middleware`, `src/routes`, `src/db/migrations`, `src/db/queries`)
+- `server/package.json` — ESM (`"type": "module"`), dependencies: `express`, `cors`, `dotenv`, `pg`, `firebase-admin`, `@aws-sdk/client-s3`, `@aws-sdk/s3-request-presigner`, dev dependency `nodemon`
+- Provisioned a Neon Postgres project (dev database) and a Firebase service account for server-side token verification
+- `server/.env` / `.env.example` — `DATABASE_URL`, `FIREBASE_PROJECT_ID`/`FIREBASE_CLIENT_EMAIL`/`FIREBASE_PRIVATE_KEY`, `AWS_*`/`S3_BUCKET_NAME` (S3 bucket/IAM user provisioning deferred to a later session)
+- `server/src/config/env.js` — loads and validates required env vars via `dotenv`
+- `server/src/config/db.js` — `pg` `Pool` using `DATABASE_URL`
+- `server/src/db/migrations/001_create_categories_table.sql` and `002_create_photos_table.sql` — schema matching the locked-in plan (`owner_uid`, `s3_key`, `category_id`, `date_taken`, indexes)
+- `server/src/db/migrate.js` — migration runner; tracks applied migrations in a `schema_migrations` table, applies pending `.sql` files in order inside a transaction each
+- Ran `npm run migrate` against Neon — both migrations applied successfully, `categories` and `photos` tables confirmed created with seed data
+- Handed off (not yet created/run): `server/src/config/firebaseAdmin.js`, `server/src/middleware/authenticate.js`, `server/src/middleware/errorHandler.js`, `server/src/routes/health.routes.js`, `server/src/app.js`, `server/src/index.js` — this is the very next step to pick up
+- Found and fixed: root `.gitignore`'s `.env*` rule (no leading slash) was matching at every directory depth, silently excluding both `server/.env.example` and the root `.env.example` from any future commit — added explicit `!.env.example`-style exceptions so example templates are trackable while real `.env` files stay ignored
+
 ## Current File Structure
 
 ```
@@ -149,5 +165,6 @@ src/
 
 ## What's Next
 
-1. **Backend** — Node/Express API connecting to AWS S3 and a database
-2. **Deployment** — configure Vite base URL and hosting for `redflowerpics.dev`
+1. **Backend** — write `server/src/config/firebaseAdmin.js`, `authenticate.js` middleware, `errorHandler.js`, `health.routes.js`, `app.js`, `index.js`; run `npm run dev` and verify `GET /api/health`
+2. **S3** — provision bucket + IAM user (deferred from Session 6), then build the presign/confirm upload routes and the photos/categories routes
+3. **Deployment** — configure Vite base URL and hosting for `redflowerpics.dev`

@@ -4,14 +4,16 @@ A personal photo storage web app. Users log in and can browse and upload their p
 
 ## Status
 
-In active development. The frontend scaffold, login/sign-up flow, gallery page, photo upload/delete flow, and profile page are complete. Authentication is handled by Firebase. Backend and S3 integration are upcoming.
+In active development. The frontend scaffold, login/sign-up flow, gallery page, photo upload/delete flow, and profile page are complete. Authentication is handled by Firebase. Backend work has started: `/server` is scaffolded with Postgres (Neon) migrations verified; the Express app, Firebase Admin token verification, and S3 integration are in progress.
 
 ## Tech stack
 
 - **Frontend:** React 19 (JavaScript), Vite
 - **Routing:** React Router v6
-- **Auth:** Firebase Authentication (email/password)
-- **Storage (planned):** AWS S3 + database
+- **Auth:** Firebase Authentication (email/password); server-side verified via `firebase-admin`
+- **Backend:** Node/Express (`/server`), plain ESM, no ORM
+- **Database:** PostgreSQL — Neon (dev), AWS RDS (prod)
+- **Storage (planned):** AWS S3, presigned uploads/downloads
 - **Deployment target:** redflowerpics.dev
 
 ## Prerequisites
@@ -62,3 +64,21 @@ src/
 ## Authentication
 
 Auth is handled by Firebase Authentication (email/password provider). Sign up for a new account at `/signup`, or log in at `/login`. Password resets are available from the Profile page.
+
+## Backend (`/server`)
+
+Node/Express API backed by PostgreSQL (Neon in dev, AWS RDS in prod) and AWS S3 for photo storage. Firebase ID tokens issued to the frontend are verified server-side via `firebase-admin` — there is no separate login system.
+
+```
+server/
+  src/
+    config/
+      env.js        # loads/validates process.env
+      db.js         # pg Pool
+    db/
+      migrations/   # numbered .sql files
+      migrate.js    # migration runner (tracks applied migrations in schema_migrations)
+  .env.example       # server-side env vars (DATABASE_URL, Firebase Admin creds, AWS/S3)
+```
+
+Status: migrations run cleanly against Neon (`categories` and `photos` tables exist with seed data). Express app, Firebase Admin middleware, and S3 routes are the next step — see `implement_upload_backend.plan.md`.
