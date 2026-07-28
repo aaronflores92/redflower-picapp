@@ -1,0 +1,8 @@
+// Express app entry point that starts server listening
+
+import { app } from './app.js';
+import { config } from './config/env.js';
+
+app.listen(config.port, () => {
+    console.log(`Server listening on port ${config.port}`);
+});

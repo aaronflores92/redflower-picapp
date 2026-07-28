@@ -2,7 +2,7 @@
 
 **Domain:** redflowerpics.dev
 **Stack:** Vite + React (JavaScript), React Router v6
-**Last Updated:** 2026-07-21
+**Last Updated:** 2026-07-28
 
 ---
 
@@ -135,6 +135,20 @@ RedFlowerPics is a personal photo application with a web frontend accessible fro
 - Handed off (not yet created/run): `server/src/config/firebaseAdmin.js`, `server/src/middleware/authenticate.js`, `server/src/middleware/errorHandler.js`, `server/src/routes/health.routes.js`, `server/src/app.js`, `server/src/index.js` — this is the very next step to pick up
 - Found and fixed: root `.gitignore`'s `.env*` rule (no leading slash) was matching at every directory depth, silently excluding both `server/.env.example` and the root `.env.example` from any future commit — added explicit `!.env.example`-style exceptions so example templates are trackable while real `.env` files stay ignored
 
+---
+
+### Session 7
+
+**Step 11 — Express app skeleton complete**
+- Created `server/src/config/firebaseAdmin.js` — initializes the Firebase Admin SDK via a service account cert (`\\n` → real newline fix on the private key, since `.env` flattens multi-line PEM keys)
+- Created `server/src/middleware/authenticate.js` — extracts the `Authorization: Bearer <token>` header, verifies it via `firebaseAuth.verifyIdToken`, sets `req.uid`/`req.displayName` on success, 401 on missing/invalid token
+- Created `server/src/middleware/errorHandler.js` — 4-argument Express error handler, returns consistent `{ error }` JSON, defaults to 500
+- Created `server/src/routes/health.routes.js` — `GET /api/health`, no auth required
+- Created `server/src/app.js` — registers `cors`/`express.json()` middleware, mounts the health router at `/api/health`, registers the error handler last
+- Created `server/src/index.js` — entry point, starts `app.listen(config.port)`
+- User hand-wrote all six files (guided step-by-step); caught and fixed a real bug along the way — a missing trailing space in `startsWith('Bearer ')` that, combined with `slice(7)`, would have mis-sliced malformed Authorization headers instead of rejecting them
+- Verified: `npm run dev` in `/server`, `curl http://localhost:4000/api/health` → `{"status":"ok"}`
+
 ## Current File Structure
 
 ```
@@ -165,6 +179,7 @@ src/
 
 ## What's Next
 
-1. **Backend** — write `server/src/config/firebaseAdmin.js`, `authenticate.js` middleware, `errorHandler.js`, `health.routes.js`, `app.js`, `index.js`; run `npm run dev` and verify `GET /api/health`
-2. **S3** — provision bucket + IAM user (deferred from Session 6), then build the presign/confirm upload routes and the photos/categories routes
-3. **Deployment** — configure Vite base URL and hosting for `redflowerpics.dev`
+1. **S3** — provision bucket + IAM user (deferred from Session 6), then build the presign/confirm upload routes and the photos/categories routes (`uploads.routes.js`, `photos.routes.js`, `categories.routes.js` + matching `db/queries/*.js` files)
+2. **Backend verification** — remaining manual checks from `implement_upload_backend.plan.md`'s Verification section (health check already confirmed)
+3. **Frontend integration** — swap `GalleryPage.jsx`/`UploadModal.jsx` off mock data once the routes above exist
+4. **Deployment** — configure Vite base URL and hosting for `redflowerpics.dev`

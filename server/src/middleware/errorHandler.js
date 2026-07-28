@@ -1,0 +1,6 @@
+// Error handling catch-all that formats any error passed to next(err) in consistent JSON response
+
+export function errorHandler(err, req, res, next) {
+    console.error(err);
+    res.status(err.status || 500).json({ error: err.message || 'Internal Server Error' });
+}
