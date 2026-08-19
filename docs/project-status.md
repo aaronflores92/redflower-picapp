@@ -2,7 +2,7 @@
 
 **Domain:** redflowerpics.dev
 **Stack:** Vite + React (JavaScript), React Router v6
-**Last Updated:** 2026-07-29
+**Last Updated:** 2026-08-19
 
 ---
 
@@ -161,6 +161,18 @@ RedFlowerPics is a personal photo application with a web frontend accessible fro
 - Created `server/src/db/queries/categories.queries.js` (`getAllCategories`) and `server/src/routes/categories.routes.js` (`GET /api/categories`, behind `authenticate`); mounted in `app.js`
 - Verified: `npm run dev` + `curl http://localhost:4000/api/categories` with a real Firebase ID token (grabbed via a temporary `window.auth = auth` debug line in `firebase.js`, removed after) → returns the seeded category list
 
+### Session 9
+
+**Step 13 — Photos routes (basic list/delete)**
+- Created `server/src/db/queries/photos.queries.js` — `getAllPhotos()` (LEFT JOIN against `categories` so a null `category_id` doesn't drop the row) and `deletePhoto(id, ownerUid)` (single `DELETE ... WHERE id = $1 AND owner_uid = $2 RETURNING id`, ownership check baked into the query itself rather than a separate `SELECT`)
+- Created `server/src/routes/photos.routes.js` — `GET /api/photos` (no filters yet) maps each row to `{ id, url, alt, category, uploaderName, year }`, generating presigned S3 GET URLs (15 min TTL) via `getSignedUrl`/`GetObjectCommand`; `year` derives from `date_taken`, falling back to `created_at`; `DELETE /api/photos/:id` returns 404 for both "not found" and "not the owner" so it doesn't leak which case occurred
+- Mounted `photosRouter` at `/api/photos` in `app.js`
+- User hand-wrote both files; caught and fixed three bugs during review: a typo'd router variable name (`phototsRouter`), an unused stray import (`import { auth } from 'firebase-admin'`), and a typo'd keyword (`away` instead of `await` in the query)
+- Deferred to a later pass: `year`/`category`/`uploader` query-param filtering (decided "basic first" over building the full filter spec in one pass)
+- Verified: `GET /api/photos` with a valid Firebase ID token → `{"photos":[]}` (table still empty, no uploads route yet); `DELETE /api/photos/:id` on a nonexistent id → 404 `{"error":"Photo not found"}`
+
+---
+
 ## Current File Structure
 
 ```
@@ -191,8 +203,8 @@ src/
 
 ## What's Next
 
-1. **Photos routes** — build `GET /api/photos` (with year/category/uploader filtering + presigned GET URLs) and `DELETE /api/photos/:id` (owner-only), plus matching `db/queries/photos.queries.js`
+1. **Photos route filters** — add `year`/`category`/`uploader` query-param filtering to `GET /api/photos` (deferred from Session 9's basic pass)
 2. **Uploads routes** — `uploads.routes.js` (`POST /api/uploads/presign`, `POST /api/uploads/confirm`), using `s3Client.js`
-3. **Backend verification** — remaining manual checks from `implement_upload_backend.plan.md`'s Verification section (health check + categories confirmed so far)
+3. **Backend verification** — remaining manual checks from `implement_upload_backend.plan.md`'s Verification section (health check, categories, and basic photos list/delete confirmed so far)
 4. **Frontend integration** — swap `GalleryPage.jsx`/`UploadModal.jsx` off mock data once the routes above exist
 5. **Deployment** — configure Vite base URL and hosting for `redflowerpics.dev`
