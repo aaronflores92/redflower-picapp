@@ -4,7 +4,7 @@ A personal photo storage web app. Users log in and can browse and upload their p
 
 ## Status
 
-In active development. The frontend scaffold, login/sign-up flow, gallery page, photo upload/delete flow, and profile page are complete. Authentication is handled by Firebase. Backend work: `/server` has a working Express app with Postgres (Neon) migrations, Firebase Admin token verification middleware, and a verified `GET /api/health` endpoint. S3 integration and the photos/categories/uploads routes are next.
+In active development. The frontend scaffold, login/sign-up flow, gallery page, photo upload/delete flow, and profile page are complete. Authentication is handled by Firebase. Backend work: `/server` has a working Express app with Postgres (Neon) migrations, Firebase Admin token verification middleware, a provisioned S3 bucket + scoped IAM user, and verified `GET /api/health`/`GET /api/categories` endpoints. The photos and uploads routes are next.
 
 ## Tech stack
 
@@ -76,17 +76,21 @@ server/
       env.js            # loads/validates process.env
       db.js             # pg Pool
       firebaseAdmin.js  # Firebase Admin SDK init (service account)
+      s3Client.js       # shared S3Client instance (credentials from env, auto-picked up by the SDK)
     middleware/
       authenticate.js   # verifies Firebase ID token -> req.uid/req.displayName
       errorHandler.js   # catch-all JSON error responses
     routes/
-      health.routes.js  # GET /api/health, no auth
+      health.routes.js      # GET /api/health, no auth
+      categories.routes.js  # GET /api/categories, behind authenticate
     db/
       migrations/   # numbered .sql files
       migrate.js    # migration runner (tracks applied migrations in schema_migrations)
+      queries/
+        categories.queries.js  # getAllCategories
     app.js          # express app + middleware + route mounting
     index.js         # entry point, starts the listener
   .env.example       # server-side env vars (DATABASE_URL, Firebase Admin creds, AWS/S3)
 ```
 
-Status: migrations run cleanly against Neon (`categories` and `photos` tables exist with seed data). Express app skeleton is up and verified (`GET /api/health` → `{"status":"ok"}`). S3 provisioning and the photos/categories/uploads routes are next — see `implement_upload_backend.plan.md`.
+Status: migrations run cleanly against Neon (`categories` and `photos` tables exist with seed data). Express app skeleton is up and verified (`GET /api/health` → `{"status":"ok"}`, `GET /api/categories` → seeded list with a valid Firebase ID token). S3 bucket + scoped IAM user are provisioned (CORS configured for the local Vite origin). The photos and uploads routes are next — see `implement_upload_backend.plan.md`.

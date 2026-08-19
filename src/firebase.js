@@ -13,3 +13,5 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+// Following line for debugging purposes, to be able to test calls to APIs from Command Line
+// window.auth = auth;

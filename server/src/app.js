@@ -6,9 +6,11 @@ import express from 'express';
 import { config } from './config/env.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { healthRouter } from './routes/health.routes.js';
+import { categoriesRouter } from './routes/categories.routes.js';
 
 export const app = express();
 app.use(cors({ origin: config.corsOrigin }));
 app.use(express.json());
 app.use('/api/health', healthRouter);
+app.use('/api/categories', categoriesRouter);
 app.use(errorHandler);

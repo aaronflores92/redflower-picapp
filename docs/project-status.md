@@ -2,7 +2,7 @@
 
 **Domain:** redflowerpics.dev
 **Stack:** Vite + React (JavaScript), React Router v6
-**Last Updated:** 2026-07-28
+**Last Updated:** 2026-07-29
 
 ---
 
@@ -149,6 +149,18 @@ RedFlowerPics is a personal photo application with a web frontend accessible fro
 - User hand-wrote all six files (guided step-by-step); caught and fixed a real bug along the way — a missing trailing space in `startsWith('Bearer ')` that, combined with `slice(7)`, would have mis-sliced malformed Authorization headers instead of rejecting them
 - Verified: `npm run dev` in `/server`, `curl http://localhost:4000/api/health` → `{"status":"ok"}`
 
+### Session 8
+
+**Step 12 — S3 provisioning + categories route**
+- Provisioned the S3 bucket (private, all Block Public Access settings on, no versioning)
+- Created a scoped IAM user (`photoapp-server-dev`) with an inline policy limited to `s3:PutObject`/`s3:GetObject` on the new bucket only — no broad managed policy attached
+- Generated a local-dev access key ("Local code" use case); noted that EC2 deployment will use an IAM role/instance profile instead of a stored key
+- Configured bucket CORS to allow `PUT`/`GET` from `http://localhost:5173` (prod origin to be added later)
+- Filled in `server/.env` with the real `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `S3_BUCKET_NAME` values
+- Created `server/src/config/s3Client.js` — shared `S3Client` instance (region from `config.awsRegion`; credentials picked up automatically from env by the SDK), same pattern as `db.js`'s `pool`
+- Created `server/src/db/queries/categories.queries.js` (`getAllCategories`) and `server/src/routes/categories.routes.js` (`GET /api/categories`, behind `authenticate`); mounted in `app.js`
+- Verified: `npm run dev` + `curl http://localhost:4000/api/categories` with a real Firebase ID token (grabbed via a temporary `window.auth = auth` debug line in `firebase.js`, removed after) → returns the seeded category list
+
 ## Current File Structure
 
 ```
@@ -179,7 +191,8 @@ src/
 
 ## What's Next
 
-1. **S3** — provision bucket + IAM user (deferred from Session 6), then build the presign/confirm upload routes and the photos/categories routes (`uploads.routes.js`, `photos.routes.js`, `categories.routes.js` + matching `db/queries/*.js` files)
-2. **Backend verification** — remaining manual checks from `implement_upload_backend.plan.md`'s Verification section (health check already confirmed)
-3. **Frontend integration** — swap `GalleryPage.jsx`/`UploadModal.jsx` off mock data once the routes above exist
-4. **Deployment** — configure Vite base URL and hosting for `redflowerpics.dev`
+1. **Photos routes** — build `GET /api/photos` (with year/category/uploader filtering + presigned GET URLs) and `DELETE /api/photos/:id` (owner-only), plus matching `db/queries/photos.queries.js`
+2. **Uploads routes** — `uploads.routes.js` (`POST /api/uploads/presign`, `POST /api/uploads/confirm`), using `s3Client.js`
+3. **Backend verification** — remaining manual checks from `implement_upload_backend.plan.md`'s Verification section (health check + categories confirmed so far)
+4. **Frontend integration** — swap `GalleryPage.jsx`/`UploadModal.jsx` off mock data once the routes above exist
+5. **Deployment** — configure Vite base URL and hosting for `redflowerpics.dev`

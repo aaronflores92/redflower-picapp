@@ -1,3 +1,5 @@
+// Creates Firebase Admin used to check if actions/calls are made using a valid authenticated user
+
 import admin from 'firebase-admin';
 
 import { config } from './env.js';
