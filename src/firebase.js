@@ -14,4 +14,5 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 // Following line for debugging purposes, to be able to test calls to APIs from Command Line
+// use await window.auth.currentUser.getIdToken() in browser console to get token
 // window.auth = auth;

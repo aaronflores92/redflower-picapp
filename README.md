@@ -4,7 +4,7 @@ A personal photo storage web app. Users log in and can browse and upload their p
 
 ## Status
 
-In active development. The frontend scaffold, login/sign-up flow, gallery page, photo upload/delete flow, and profile page are complete. Authentication is handled by Firebase. Backend work: `/server` has a working Express app with Postgres (Neon) migrations, Firebase Admin token verification middleware, a provisioned S3 bucket + scoped IAM user, and verified `GET /api/health`/`GET /api/categories` endpoints. A basic `GET /api/photos` (list, no filters yet) and `DELETE /api/photos/:id` (owner-only) are done and verified; filtering and the uploads routes are next.
+In active development. The frontend scaffold, login/sign-up flow, gallery page, photo upload/delete flow, and profile page are complete. Authentication is handled by Firebase. Backend work: `/server` has a working Express app with Postgres (Neon) migrations, Firebase Admin token verification middleware, a provisioned S3 bucket + scoped IAM user, and verified `GET /api/health`/`GET /api/categories` endpoints. `GET /api/photos` (list, no filters yet), `DELETE /api/photos/:id` (owner-only), and the full upload pipeline (`POST /api/uploads/presign` + `POST /api/uploads/confirm`) are done and verified end-to-end via curl (presign → real S3 PUT → confirm → row in Postgres → shows up in the list). Query-param filtering on `GET /api/photos` is next, then frontend integration.
 
 ## Tech stack
 
@@ -89,10 +89,12 @@ server/
       migrate.js    # migration runner (tracks applied migrations in schema_migrations)
       queries/
         categories.queries.js  # getAllCategories
-        photos.queries.js       # getAllPhotos, deletePhoto
+        photos.queries.js       # getAllPhotos, deletePhoto, insertPhoto, getPhotoById
+    routes/
+      uploads.routes.js      # POST /api/uploads/presign, POST /api/uploads/confirm, behind authenticate
     app.js          # express app + middleware + route mounting
     index.js         # entry point, starts the listener
   .env.example       # server-side env vars (DATABASE_URL, Firebase Admin creds, AWS/S3)
 ```
 
-Status: migrations run cleanly against Neon (`categories` and `photos` tables exist with seed data). Express app skeleton is up and verified (`GET /api/health` → `{"status":"ok"}`, `GET /api/categories` → seeded list with a valid Firebase ID token). S3 bucket + scoped IAM user are provisioned (CORS configured for the local Vite origin). `GET /api/photos` (list, presigned URLs, no filters yet) and `DELETE /api/photos/:id` (owner-only) are done and verified. Year/category/uploader filtering and the uploads routes (`presign`/`confirm`) are next — see `implement_upload_backend.plan.md`.
+Status: migrations run cleanly against Neon (`categories` and `photos` tables exist with seed data). Express app skeleton is up and verified (`GET /api/health` → `{"status":"ok"}`, `GET /api/categories` → seeded list with a valid Firebase ID token). S3 bucket + scoped IAM user are provisioned (CORS configured for the local Vite origin). `GET /api/photos` (list, presigned URLs, no filters yet), `DELETE /api/photos/:id` (owner-only), and the full upload pipeline (`presign`/`confirm`) are done and verified end-to-end via curl. Year/category/uploader filtering on `GET /api/photos` is next — see `implement_upload_backend.plan.md`.

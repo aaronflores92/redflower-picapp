@@ -2,7 +2,7 @@
 
 **Domain:** redflowerpics.dev
 **Stack:** Vite + React (JavaScript), React Router v6
-**Last Updated:** 2026-08-19
+**Last Updated:** 2026-08-20
 
 ---
 
@@ -171,6 +171,19 @@ RedFlowerPics is a personal photo application with a web frontend accessible fro
 - Deferred to a later pass: `year`/`category`/`uploader` query-param filtering (decided "basic first" over building the full filter spec in one pass)
 - Verified: `GET /api/photos` with a valid Firebase ID token → `{"photos":[]}` (table still empty, no uploads route yet); `DELETE /api/photos/:id` on a nonexistent id → 404 `{"error":"Photo not found"}`
 
+### Session 10
+
+**Step 14 — Uploads routes (presign/confirm)**
+- Added `insertPhoto(data)` and `getPhotoById(id)` to `server/src/db/queries/photos.queries.js` — `insertPhoto` runs the `INSERT ... RETURNING id`, `getPhotoById` re-fetches the row joined against `categories` (same shape as `getAllPhotos`, filtered to one row) so the confirm response can include the category name
+- Created `server/src/routes/uploads.routes.js`:
+  - `POST /api/uploads/presign` — server generates `s3Key` as `uploads/<uid>/<crypto.randomUUID()>-<filename>` (never trusts a client-supplied path), returns a presigned `PutObjectCommand` URL (5 min TTL) plus the `s3Key`
+  - `POST /api/uploads/confirm` — re-validates the returned `s3Key` starts with `uploads/<req.uid>/` before trusting it, inserts the photo row, then returns `{ photo: { id, url, alt, category, uploaderName, year } }` (same shape as the `GET /api/photos` list) using a fresh presigned `GetObjectCommand` URL (15 min TTL)
+  - Mounted `uploadsRouter` at `/api/uploads` in `app.js`
+- User hand-wrote both files; caught one bug during review — `insertPhoto` referenced `results.rows[0].id` (undefined variable, `results` vs `result`) instead of `result.rows[0].id`, which would have thrown on every real confirm call
+- Verified the full pipeline end-to-end via curl: `presign` → real `PUT` of a test image straight to S3 → `confirm` → row landed in Postgres → `GET /api/photos` showed it with a working presigned URL
+- Hit and resolved a PowerShell-specific curl gotcha: passing JSON directly via `-d '{"...":"..."}'` gets mangled by PowerShell's argument quoting (a leading `'` ends up inside the request body, breaking JSON parsing) — fix is writing the JSON to a file first (`'...' | Out-File -Encoding utf8 body.json`) and passing `-d "@body.json"`
+- Response-shape-building logic (`url`/`alt`/`category`/`uploaderName`/`year`) is now duplicated between `photos.routes.js`'s list endpoint and `uploads.routes.js`'s confirm endpoint — left as-is intentionally; candidate to extract into a shared helper if a third call site appears
+
 ---
 
 ## Current File Structure
@@ -204,7 +217,5 @@ src/
 ## What's Next
 
 1. **Photos route filters** — add `year`/`category`/`uploader` query-param filtering to `GET /api/photos` (deferred from Session 9's basic pass)
-2. **Uploads routes** — `uploads.routes.js` (`POST /api/uploads/presign`, `POST /api/uploads/confirm`), using `s3Client.js`
-3. **Backend verification** — remaining manual checks from `implement_upload_backend.plan.md`'s Verification section (health check, categories, and basic photos list/delete confirmed so far)
-4. **Frontend integration** — swap `GalleryPage.jsx`/`UploadModal.jsx` off mock data once the routes above exist
-5. **Deployment** — configure Vite base URL and hosting for `redflowerpics.dev`
+2. **Frontend integration** — swap `GalleryPage.jsx`/`UploadModal.jsx` off mock data now that list/delete/upload routes all exist; `UploadModal.jsx` needs to retain the actual `File` object, extract EXIF client-side, then call presign → PUT → confirm per file
+3. **Deployment** — configure Vite base URL and hosting for `redflowerpics.dev`

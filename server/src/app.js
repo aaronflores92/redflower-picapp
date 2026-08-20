@@ -7,6 +7,7 @@ import { config } from './config/env.js';
 import { healthRouter } from './routes/health.routes.js';
 import { categoriesRouter } from './routes/categories.routes.js';
 import { photosRouter } from './routes/photos.routes.js';
+import { uploadsRouter } from './routes/uploads.routes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 export const app = express();
@@ -15,4 +16,5 @@ app.use(express.json());
 app.use('/api/health', healthRouter);
 app.use('/api/categories', categoriesRouter);
 app.use('/api/photos', photosRouter);
+app.use('/api/uploads', uploadsRouter);
 app.use(errorHandler);
