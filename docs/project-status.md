@@ -219,3 +219,25 @@ src/
 1. **Photos route filters** — add `year`/`category`/`uploader` query-param filtering to `GET /api/photos` (deferred from Session 9's basic pass)
 2. **Frontend integration** — swap `GalleryPage.jsx`/`UploadModal.jsx` off mock data now that list/delete/upload routes all exist; `UploadModal.jsx` needs to retain the actual `File` object, extract EXIF client-side, then call presign → PUT → confirm per file
 3. **Deployment** — configure Vite base URL and hosting for `redflowerpics.dev`
+
+---
+
+## Deferred — For Later (post-prod hardening)
+
+- **S3 object not deleted on photo delete** — `DELETE /api/photos/:id` (`server/src/routes/photos.routes.js`) only removes the Postgres row via `deletePhoto` (`server/src/db/queries/photos.queries.js`); it never issues an S3 `DeleteObjectCommand`. The object stays orphaned in the bucket after its DB row is gone, silently accumulating storage cost over time. Called out as explicitly out of scope when the backend plan was written; add the `DeleteObjectCommand` call once running in a real prod environment.
+
+- **Upload file type restriction** — neither `UploadModal.jsx` (the `accept="image/*"` file input attribute is a UI hint only, not enforced) nor `server/src/routes/uploads.routes.js` (`presign`/`confirm` both pass through whatever `contentType` the client sends, no allowlist) currently restrict uploads to actual image types. Fine for just-you/family use during dev; worth adding real validation (client-side + server-side allowlist, e.g. `image/jpeg`, `image/png`, `image/gif`, `image/webp`, `image/heic`) once this is running in a real prod environment.
+
+- **Thumbnail generation for gallery loading** — the gallery grid currently loads full-size presigned images for every thumbnail; generate and serve smaller resized thumbnails instead for faster gallery loads. Overlaps with the backend plan's original "Image resizing/thumbnails" out-of-scope line.
+
+- **Remember previously used email on login** — `LoginPage.jsx`'s email `<input>` has no `name`/`autoComplete` attribute, so browsers can't reliably offer autofill for it. At minimum add `autoComplete="email"`; a custom "recent emails" dropdown could be a fallback if browser autofill isn't sufficient.
+
+- **Change profile picture** — needs an avatar upload flow (S3 storage + a column to reference it) and a UI entry point on `ProfilePage.jsx`, replacing the current static SVG placeholder avatar.
+
+- **Seed a "test" category** — `INSERT INTO categories (name) VALUES ('test')`. Not a feature, just a to-do.
+
+- **Filter gallery by one or more categories** — overlaps with `What's Next` item #1 (`year`/`category`/`uploader` query-param filtering on `GET /api/photos`); tracked there rather than duplicated here.
+
+- **Upload photos with multiple categories at once** — conflicts with a locked-in design decision from the backend plan ("fixed list via a categories lookup table, **one category per photo**"). Supporting multiple categories per photo needs a real schema change (a `photo_categories` join table replacing the `category_id` column on `photos`), not just a UI addition — worth a deliberate design decision before picking this up.
+
+- **Change a photo's assigned category after upload** — needs a new `PATCH /api/photos/:id` endpoint; none exists yet (only list, delete, and insert-via-`confirm` today).

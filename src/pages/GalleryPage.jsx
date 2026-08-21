@@ -1,29 +1,25 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import Header from '../components/Header';
 import UploadModal from '../components/UploadModal';
+import { useApi } from '../api';
 
 import './GalleryPage.css';
 
-const MOCK_PHOTOS = [
-    { id: 1, url: 'https://picsum.photos/seed/1/300/300', alt: 'Photo 1' },
-    { id: 2, url: 'https://picsum.photos/seed/2/300/300', alt: 'Photo 2' },
-    { id: 3, url: 'https://picsum.photos/seed/3/300/300', alt: 'Photo 3' },
-    { id: 4, url: 'https://picsum.photos/seed/4/300/300', alt: 'Photo 4' },
-    { id: 5, url: 'https://picsum.photos/seed/5/300/300', alt: 'Photo 5' },
-    { id: 6, url: 'https://picsum.photos/seed/6/300/300', alt: 'Photo 6' },
-    { id: 7, url: 'https://picsum.photos/seed/7/300/300', alt: 'Photo 7' },
-    { id: 8, url: 'https://picsum.photos/seed/8/300/300', alt: 'Photo 8' },
-    { id: 9, url: 'https://picsum.photos/seed/9/300/300', alt: 'Photo 9' },
-    { id: 10, url: 'https://picsum.photos/seed/10/300/300', alt: 'Photo 10' },
-    { id: 11, url: 'https://picsum.photos/seed/11/300/300', alt: 'Photo 11' },
-    { id: 12, url: 'https://picsum.photos/seed/12/300/300', alt: 'Photo 12' },
-];
-
 function GalleryPage() {
-    const [photos, setPhotos] = useState(MOCK_PHOTOS);
+    const api = useApi();
+    const [photos, setPhotos] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
     const [selectedIds, setSelectedIds] = useState(new Set());
     const [showModal, setShowModal] = useState(false);
+
+    useEffect(() => {
+        api.getPhotos()
+            .then(data => setPhotos(data.photos))
+            .catch(err => setError(err.message))
+            .finally(() => setLoading(false));
+    }, []);
 
     function handleToggleSelect(id) {
         setSelectedIds(prev => {
@@ -38,21 +34,23 @@ function GalleryPage() {
         });
     }
 
-    function handleDeleteSelected() {
+    async function handleDeleteSelected() {
         const count = selectedIds.size;
         const confirmed = window.confirm(`Delete ${count} photo${count !== 1 ? 's' : ''}?`);
-        if (confirmed) {
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            await Promise.all([...selectedIds].map(id => api.deletePhoto(id)));
             setPhotos(prev => prev.filter(p => !selectedIds.has(p.id)));
             setSelectedIds(new Set());
+        } catch (err) {
+            setError(err.message);
         }
     }
 
-    function handleUploadConfirm(previews) {
-        const newPhotos = previews.map((p, i) => ({
-            id: Date.now() + i,
-            url: p.url,
-            alt: p.alt,
-        }));
+    function handleUploadConfirm(newPhotos) {
         setPhotos(prev => [...prev, ...newPhotos]);
         setShowModal(false);
     }
@@ -61,8 +59,9 @@ function GalleryPage() {
         <div className="gallery-page">
             <Header />
             <h1>Gallery</h1>
+            {error && <p className="error-text">{error}</p>}
             <div className="gallery-actions">
-                <button className="btn btn-primary" onClick={() => { console.log('clicked'); setShowModal(true); }}>
+                <button className="btn btn-primary" onClick={() => setShowModal(true)}>
                     Add Photos
                 </button>
                 <button
@@ -73,19 +72,22 @@ function GalleryPage() {
                     Delete Selected {selectedIds.size > 0 ? `(${selectedIds.size})` : ''}
                 </button>
             </div>
-            <div className="photo-grid">
-                {photos.map((photo) => (
-                    <div
-                        key={photo.id}
-                        className={`photo-card${selectedIds.has(photo.id) ? ' selected' : ''}`}
-                        onClick={() => handleToggleSelect(photo.id)}
-                    >
-                        <img src={photo.url} alt={photo.alt} />
-                        {selectedIds.has(photo.id) && <span className="checkmark">✓</span>}
-                    </div>
-                ))}
-            </div>
-            {console.log('showModal:', showModal)}
+            {loading ? (
+                <p>Loading...</p>
+            ) : (
+                <div className="photo-grid">
+                    {photos.map((photo) => (
+                        <div
+                            key={photo.id}
+                            className={`photo-card${selectedIds.has(photo.id) ? ' selected' : ''}`}
+                            onClick={() => handleToggleSelect(photo.id)}
+                        >
+                            <img src={photo.url} alt={photo.alt} />
+                            {selectedIds.has(photo.id) && <span className="checkmark">✓</span>}
+                        </div>
+                    ))}
+                </div>
+            )}
             {showModal && (
                 <UploadModal
                     onClose={() => setShowModal(false)}

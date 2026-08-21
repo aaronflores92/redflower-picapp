@@ -29,6 +29,21 @@
     color: #e0e0e0;
 }
 
+.modal select {
+    background-color: #1a1a2e;
+    color: #e0e0e0;
+    border: 1px solid #2a2a4a;
+    border-radius: 4px;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.modal input:disabled,
+.modal select:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 .modal-preview-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
